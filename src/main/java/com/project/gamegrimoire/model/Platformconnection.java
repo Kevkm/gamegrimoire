@@ -7,7 +7,7 @@ import com.project.gamegrimoire.model.Game.Platform;
 
 @Entity
 @Table(name = "platformconnections")
-public class Platformconnection {
+public class PlatformConnection {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

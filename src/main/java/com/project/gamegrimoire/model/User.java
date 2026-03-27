@@ -1,18 +1,10 @@
 package com.project.gamegrimoire.model;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 @Entity
 @Table(name = "users")
 public class User {
@@ -27,7 +19,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Platformconnection> platformConnections = new ArrayList<>();
+    private List<PlatformConnection> platformConnections = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Game> games = new ArrayList<>();
@@ -58,8 +50,8 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    public List<Platformconnection> getPlatformConnections() { return platformConnections;}
-    public void setPlatformConnections(List<Platformconnection> platformConnections) {
+    public List<PlatformConnection> getPlatformConnections() { return platformConnections;}
+    public void setPlatformConnections(List<PlatformConnection> platformConnections) {
         this.platformConnections = platformConnections;
     }
 
