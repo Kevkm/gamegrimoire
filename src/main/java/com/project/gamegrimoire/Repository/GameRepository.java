@@ -19,4 +19,5 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     // Total games for a user
     long countByUser(User user);
     
+    List<Game> findByUserAndPlatformGameId(User user, String platformGameId);
 }

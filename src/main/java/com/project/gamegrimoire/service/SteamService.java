@@ -1,20 +1,20 @@
 package com.project.gamegrimoire.service;
 
 
-import com.project.gamegrimoire.dto.steam.SteamOwnedGamesResponse;
-import com.project.gamegrimoire.model.Game;
-import com.project.gamegrimoire.model.User;
-import com.project.gamegrimoire.Repository.GameRepository;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
-import java.time.LocalDateTime;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.ArrayList;
+import com.project.gamegrimoire.Repository.GameRepository;
+import com.project.gamegrimoire.dto.steam.SteamOwnedGamesResponse;
+import com.project.gamegrimoire.model.Game;
+import com.project.gamegrimoire.model.User;
 
 @Service
 public class SteamService {
@@ -43,15 +43,12 @@ public class SteamService {
 
         List<Game> games = new ArrayList<>();
         for (SteamOwnedGamesResponse.SteamGame steamGame : response.getResponse().getGames()) {
-            Game game = convertToGame(steamGame, user);
-            games.add(game);
-        }
-
-        return gameRepository.saveAll(games);
-    }
-
-    private Game convertToGame(SteamOwnedGamesResponse.SteamGame steamGame, User user) {
-        Game game = new Game();
+            //Check if the game already exists for the user and platform
+            List<Game> existing = gameRepository.findByUserAndPlatformGameId(
+            user, String.valueOf(steamGame.getAppid())
+        );
+        
+        Game game = existing.isEmpty() ? new Game() : existing.get(0);
         game.setUser(user);
         game.setPlatform(Game.Platform.STEAM);
         game.setPlatformGameId(String.valueOf(steamGame.getAppid()));
@@ -72,7 +69,9 @@ public class SteamService {
             ));
         }
 
-        return game;
+        games.add(game);
     }
-}
 
+    return gameRepository.saveAll(games);
+}
+}
