@@ -3,6 +3,7 @@ package com.project.gamegrimoire.Controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,18 +29,13 @@ public class SteamController {
 
     @GetMapping("/games")
     public ResponseEntity<?> getGames(
-        @RequestParam String email,
-        @RequestParam String steamId) {
-        
-            // Find or create user
-        User user = userRepository.findByEmail(email)
-            .orElseGet(() -> {
-                User newUser = new User();
-                newUser.setEmail(email);
-                newUser.setDisplayname(email.split("@")[0]);
-                return userRepository.save(newUser);
-            });
+        @RequestParam String steamId,
+        Authentication authentication) {
 
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+    
         // Get games from SteamService and save to database
         List<Game> games = steamService.fetchAndSaveGames(user, steamId);
         return ResponseEntity.ok(games);
