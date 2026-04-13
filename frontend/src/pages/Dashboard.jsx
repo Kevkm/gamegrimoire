@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { fetchSteamGames } from '../services/steamService';
 
 function Dashboard() {
+  const { user,logout } = useAuth();
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,6 +26,8 @@ function Dashboard() {
   return (
     <div>
       <h1>Game Grimoire Dashboard</h1>
+      <p>Welcome, {user.name}!</p>
+      <button onClick={logout}>Logout</button>
       <p>Total Games: {games.length}</p>
       <ul>
         {games.map(game => (
