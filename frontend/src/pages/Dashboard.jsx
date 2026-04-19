@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { fetchSteamGames } from '../services/steamService';
 import api from '../services/api';
+import Navbar from '../components/Navbar';
+import StatsBar from '../components/StatsBar';
+import PlatformCard from '../components/PlatformCard';
+import GameCard from '../components/GameCard';
+import './Dashboard.css';
 
 function Dashboard() {
   const { user,logout } = useAuth();
@@ -19,6 +24,7 @@ function Dashboard() {
   useEffect(() => {
     api.get('/api/platforms')
       .then(response => {
+        const data = Array.isArray(response.data) ? response.data : [];
         setconnections(response.data);
         const steam = response.data.find(c => c.platform === 'STEAM' && c.active);
         if (steam) {
@@ -62,67 +68,51 @@ function loadGames(id) {
   const steamConnected = connections.find(c => c.platform === 'STEAM' && c.active);
 
   return (
-    <div>
-    <div>
-      <h1>Game Grimoire Dashboard</h1>
-      <p>Welcome, {user?.username}!</p>
-      <button onClick={logout}>Logout</button>
-      </div>
+    <div className="dashboard">
+      <Navbar />
+      <div className="dashboard-content">
 
-      {/* Platform Linking */}
-      <div> 
-        <h2>Connected Gaming Platforms</h2>
-
-        <div>
-          <h3>Steam</h3>
-          {steamConnected ? (
-            <p> Connected (ID: {steamConnected.platformUserId})</p>
-          ) : (
-            <form onSubmit={handleLinkSteam}> 
-              <input
-                type="text"
-                placeholder="Enter Steam ID"
-                value={steamId}
-                onChange={e => setSteamId(e.target.value)}
-                required
+          {/* Platform Connections */}
+          <section className="dashboard-section dashboard-section--platforms">
+          <div className="platforms-sidebar">
+              <PlatformCard
+                platform="STEAM"
+                connected={!!steamConnected}
+                platformUserId={steamConnected?.platformUserId}
+                steamId={steamId}
+                setSteamId={setSteamId}
+                onLink={handleLinkSteam}
+                linkLoading={linkLoading}
+                linkError={linkError}
+                linkSuccess={linkSuccess}
               />
-              <button type="submit" disabled={linkLoading}>
-                {linkLoading ? 'Linking...' : 'Link Steam Account'}
-              </button>
-              {linkError && <p style={{ color: 'red' }}>{linkError}</p>}
-              {linkSuccess && <p style={{ color: 'green' }}>Steam account linked successfully!</p>}
-            </form>
-          )}
-        </div>
-        <div>
-          <h3>Xbox</h3>
-          <p>Coming soon!</p>
-        </div>
-        <div>
-          <h3>Epic Games</h3>
-          <p>Coming soon!</p>
-          </div>
-        </div>
+              <PlatformCard platform="XBOX" connected={false} />
+              <PlatformCard platform="EPIC" connected={false} />
+              </div>
+          </section>
 
-
+         <div className="dashboard-section--main">
+      <StatsBar games={games} connections={connections}/>
         {/* Games List */}
-        <div>
-          <h2>Your Games</h2>
-          {loading && <p>Loading games...</p>}
-          {error && <p style={{ color: 'red' }}>{error}</p>}
-        {!loading && !error && games.length === 0 && (
-          <p>No games found. Connect your gaming platforms to see your library.</p>
-
+        <section className="dashboard-section">
+          <div className="section-header">
+            <h2 className="section-title">Your Library</h2>
+            <span className="section-count">{games.length} games</span>
+          </div>
+          {loading && <p className="dashboard-message">Loading games...</p>}
+          {error && <p className="dashboard-message dashboard-message--error">{error}</p>}
+          {!loading && !error && games.length === 0 && (
+            <p className="dashboard-message">No games found. Connect a platform to see your library.</p>
           )}
-          <ul>
+          <div className="games-grid">
             {games.map(game => (
-              <li key={game.id}>
-                {game.name} - {Math.round(game.playtimeMinutes / 60)} hours played
-                </li>
+              <GameCard key={game.id} game={game} />
             ))}
-          </ul>
-        </div>
+          </div>
+        </section>
       </div>
+    </div>
+    </div>
   );
 }
 
