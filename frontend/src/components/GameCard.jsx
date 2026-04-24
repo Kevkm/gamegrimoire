@@ -3,7 +3,7 @@ import './GameCard.css';
 
 export default function GameCard({ game }) {
     const [imgError, setImgError] = useState(false);
-    const steamAppId = game.platformId; // Assuming platformId is the Steam App ID
+    const steamAppId = game.platformGameId; // Assuming platformGameId is the Steam App ID
     const imgURL = steamAppId && !imgError
         ? `https://cdn.akamai.steamstatic.com/steam/apps/${steamAppId}/header.jpg`
         : null;
@@ -18,13 +18,16 @@ export default function GameCard({ game }) {
 
     return (
         <div className="game-card">
-            <div className ="game-card-img.wrap">
+            <div className="game-card-img.wrap">
                 {imgURL ? (
                     <img
                         src={imgURL}
                         alt={game.name}
                         className="game-card-img"
-                        onError={() => setImgError(true)}
+                        onError={(e) => {
+                            e,EventTarget.src = `https://cdn.akamai.steamstatic.com/steam/apps/${steamAppId}/capsule_616x353.jpg`;
+                            e.target.onerror = () => setImgError(true);
+                        }}
                     />
                 ) : (
                     <div className="game-card-placeholder">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import './Login.css';
 
 export default function Login() {
   const { login } = useAuth();
@@ -37,30 +38,42 @@ export default function Login() {
   }
 
   return (
-    <div>
-      <h1>Game Grimoire</h1>
-      <h2>Sign In</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
+    <div className="auth-page">
+    <div className="auth-card">
+      <div className="auth-brand">
+        <span className="auth-brand-icon">📖</span>
+        <h1 className="auth-brand-name">Game Grimoire</h1>
+        <p className="auth-brand-sub">Sign in to your account</p>
+      </div>
+
+      {error && <div className="auth-error">{error}</div>}
+
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <div className="auth-field">
           <label>Email</label>
-          <input
+          <input 
             type="email" name="email" required
+            autoComplete="email"
             value={form.email} onChange={handleChange}
           />
         </div>
-        <div>
+        <div className="auth-field">
           <label>Password</label>
           <input
             type="password" name="password" required
+            autoComplete="current-password"
             value={form.password} onChange={handleChange}
           />
         </div>
-        <button type="submit" disabled={loading}>
-          {loading ? "Signing in..." : "Sign In"}
+        <button type="submit" className="auth-button" disabled={loading}>
+          {loading ? "Signing in..." : "Sign in"}
         </button>
       </form>
-      <p>Don't have an account? <Link to="/register">Create one</Link></p>
+
+      <p className="auth-switch">
+        Don't have an account? <Link to="/register">Sign up</Link>
+      </p>
+    </div>
     </div>
   );
 }

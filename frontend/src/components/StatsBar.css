@@ -5,16 +5,17 @@
 
 .statsbar {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr;
   gap: 16px;
-  padding: 32px 40px 0;
+  padding: 0;
+  min-width: 280px;
 }
 
 .stat-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 24px 20px;
+  padding: 24px 24px;
   text-align: center;
   animation: fadeUp 0.4s ease both;
   transition: border-color 0.2s, transform 0.2s;
@@ -56,6 +57,21 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.stat-card--mostplayed {
+  padding: 0;
+  overflow: hidden;
+}
+.stat-mostplayed-img {
+  width: 100%;
+  aspect-ratio: 460 /215;
+  object-fit: cover;
+  display: block;
+}
+
+.stat-card--mostplayed .stat-label,
+.stat-card--mostplayed .stat-value {
+  padding: 4px 12px;
 }
 
 .stat-label {

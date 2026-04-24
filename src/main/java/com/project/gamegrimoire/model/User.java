@@ -13,6 +13,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore; 
+
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -31,10 +35,10 @@ public class User {
 
     private String displayname;
     private LocalDateTime createdAt;
-
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<PlatformConnection> platformConnections = new ArrayList<>();
-
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Game> games = new ArrayList<>();
 

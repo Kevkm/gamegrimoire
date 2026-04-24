@@ -92,7 +92,6 @@ function loadGames(id) {
           </section>
 
          <div className="dashboard-section--main">
-      <StatsBar games={games} connections={connections}/>
         {/* Games List */}
         <section className="dashboard-section">
           <div className="section-header">
@@ -111,6 +110,10 @@ function loadGames(id) {
           </div>
         </section>
       </div>
+      {/* Stats Bar */}
+      <aside className="dashboard-section--stats">
+        <StatsBar games={games} connections={connections}/>
+      </aside>
     </div>
     </div>
   );

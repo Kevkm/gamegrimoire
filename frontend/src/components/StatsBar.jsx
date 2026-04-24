@@ -16,20 +16,31 @@ export default function StatsBar({ games, connections}) {
         { label: 'Total Games', value: totalGames },
         { label: 'Total Hours Played', value: totalHours.toLocaleString()},
         { label: 'Platforms Connected', value: platformConnected },
-        { label: 'Most Played Game', value: mostplayed ? `${mostplayed.name} (${Math.round((mostplayed.playtimeMinutes || 0) / 60)} hrs)` : 'N/A' }
     ];
 
     return (
-        <div className="stats-bar">
+        <div className="statsbar">
             {stats.map((stat, i) => (
-                <div className ="stat-card" key={i}>
-                    <span className="stat-icon">{stat.icon}</span>
-                    <div className={`stat-value ${stat.small ? 'stat-value--small' :''}`}>
-                        {stat.value}
-                    </div>
+                 <div className="stat-card" key={i}>
+                    <div className="stat-value">{stat.value}</div>
                     <div className="stat-label">{stat.label}</div>
                 </div>
             ))}
+            {/* Most Played Game */}
+            <div className="stat-card stat-card--mostplayed">
+                {mostplayed?.platformGameId && (
+                    <img
+                        src={`https://cdn.akamai.steamstatic.com/steam/apps/${mostplayed.platformGameId}/header.jpg`}
+                        alt={mostplayed.name}
+                        className="stat-mostplayed-img"
+                    />
+                )}
+                <div className="stat-label">Most Played</div>
+                <div className="stat-value stat-value--small">{mostplayed?.name || 'N/A'}      
+                </div>
+                <div className="stat-label">{mostplayed ? `${Math.round((mostplayed.playtimeMinutes || 0) / 60)} hrs` : ''}
+                </div>
+            </div>
         </div>
     );
 }   
