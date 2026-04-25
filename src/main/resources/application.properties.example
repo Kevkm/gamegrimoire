@@ -1,0 +1,5 @@
+gaming.xbox.client-id=YOUR_AZURE_CLIENT_ID
+gaming.xbox.client-secret=YOUR_AZURE_CLIENT_SECRET
+gaming.xbox.redirect-uri=http://localhost:8085/api/xbox/callback
+gaming.xbox.scope=XboxLive.signin offline_access
+gaming.steam.api-key=YOUR_STEAM_API_KEY
