@@ -44,8 +44,12 @@ public class PlatformConnection {
     protected void onCreate() {
         connectedAt = LocalDateTime.now();
     }
-
+    @Column(columnDefinition = "TEXT")
+    private String accessToken;
     // Getters and setters
+    public String getAccessToken() { return accessToken; }
+    public void setAccessToken(String accessToken) { this.accessToken = accessToken; }
+
     public Long getId() { return id;}
     public void setId(Long id) {
         this.id = id;

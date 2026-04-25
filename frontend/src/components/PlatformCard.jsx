@@ -3,7 +3,7 @@ import { FaSteam, FaXbox } from 'react-icons/fa';
 import { SiEpicgames } from 'react-icons/si';
 import './PlatformCard.css';
 
-export default function PlatformCard({ platform, connected, platformUserId, steamId, setSteamId, onLink, linkLoading, linkError, linkSuccess }) {
+export default function PlatformCard({ platform, connected, platformUserId, steamId, setSteamId, onLink, linkLoading, linkError, linkSuccess, onXboxConnect, onXboxDisconnect, onSteamDisconnect }) {
   const [expanded, setExpanded] = useState(false);
 
   const icons = {
@@ -18,7 +18,7 @@ export default function PlatformCard({ platform, connected, platformUserId, stea
     EPIC: 'Epic Games',
   };
 
-  const comingSoon = platform !== 'STEAM';
+  const comingSoon = platform === 'EPIC';
 
   return (
     <div className={`platform-card ${connected ? 'platform-card--connected' : ''} ${expanded ? 'platform-card--expanded' : ''}`}>
@@ -42,10 +42,20 @@ export default function PlatformCard({ platform, connected, platformUserId, stea
           </div>
 
           {connected && (
-            <p className="platform-id">ID: {platformUserId}</p>
-          )}
+    <div>
+        <p className="platform-id">ID: {platformUserId}</p>
+        {platform === 'STEAM' && (
+            <button 
+                className="platform-btn platform-btn--disconnect"
+                onClick={onSteamDisconnect}>
+                Disconnect
+            </button>
+        )}
+    </div>
+)}
 
-          {!connected && !comingSoon && (
+
+          {!connected && !comingSoon && platform !== 'XBOX' && (
             <form className="platform-form" onSubmit={onLink}>
               <input
                 type="text"
@@ -61,6 +71,18 @@ export default function PlatformCard({ platform, connected, platformUserId, stea
               {linkError && <p className="platform-error">{linkError}</p>}
               {linkSuccess && <p className="platform-success">Linked!</p>}
             </form>
+          )}
+
+        {platform === 'XBOX' && !connected && (
+          <button className="platform-btn" onClick={onXboxConnect}>
+            Connect Xbox
+          </button>
+          )}
+
+        {platform === 'XBOX' && connected && (
+          <button className="platform-btn platform-btn--disconnect" onClick={onXboxDisconnect}>
+            Disconnect
+          </button>
           )}
 
           {comingSoon && !connected && (

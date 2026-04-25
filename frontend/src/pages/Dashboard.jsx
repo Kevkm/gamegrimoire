@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchSteamGames } from '../services/steamService';
+import { getXboxStatus, connectXbox, disconnectXbox, fetchXboxGames} from '../services/xboxService';
 import api from '../services/api';
 import Navbar from '../components/Navbar';
 import StatsBar from '../components/StatsBar';
@@ -10,6 +12,7 @@ import './Dashboard.css';
 
 function Dashboard() {
   const { user,logout } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,6 +22,14 @@ function Dashboard() {
   const[linkLoading, setLinkLoading] = useState(false);
   const[linkError, setLinkError] = useState(null);
   const[linkSuccess, setLinkSuccess] = useState(false);
+
+
+
+  // Xbox state
+  const [xboxProfile, setXboxProfile] = useState(null);
+  const [xboxNotification, setXboxNotification] = useState(null);
+  const [xboxGames, setXboxGames] = useState([]);
+  const allGames = [...games, ...xboxGames];
   
   //load games from steam
   useEffect(() => {
@@ -35,6 +46,43 @@ function Dashboard() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  // Load Xbox status on mount
+  useEffect(() => {
+    getXboxStatus()
+      .then(res => setXboxProfile(res.data))
+      .catch(() => setXboxProfile(null));
+  }, []);
+
+  useEffect(() => {
+    console.log('xboxProfile:', xboxProfile);
+    if (xboxProfile?.linked) {
+        fetchXboxGames()
+            .then(res => {
+                console.log('Xbox games:', res.data);
+                setXboxGames(res.data);
+            })
+            .catch(() => setXboxGames([]));
+    }
+}, [xboxProfile]);
+
+// Handle ?xbox=linked or ?xbox=error from callback redirect
+useEffect(() => {
+  const xboxParam = searchParams.get('xbox');
+  if (xboxParam === 'linked') {
+    setXboxNotification({ type: 'success', message: 'Xbox account connected successfully!'});
+    //Refresh Xbox status
+    getXboxStatus()
+      .then(res => setXboxProfile(res.data))
+      .catch(() => {});
+      //Clear the query param
+      setSearchParams({});
+  } else if (xboxParam === 'error') {
+    setXboxNotification({type: 'error', message: 'Failed to connect Xbox account. Please try again.'});
+    setSearchParams({});
+  }
+}, [searchParams]);
+
 function loadGames(id) {
   setLoading(true);
   setError(null);
@@ -65,12 +113,41 @@ function loadGames(id) {
     }
   }
 
+  async function handleXboxDisconnect() {
+    try {
+      await disconnectXbox();
+      setXboxProfile(null);
+      setXboxNotification({ type: 'success', message: 'Xbox account disconnected.' });
+    } catch {
+      setXboxNotification({ type: 'error', message: 'Failed to disconnect Xbox account.' });
+    }
+  }
+  async function handleSteamDisconnect() {
+    try {
+        await api.delete('/api/platforms/unlink', { params: { platform: 'STEAM' } });
+        // Refresh connections from server instead of updating locally
+        const response = await api.get('/api/platforms');
+        setconnections(response.data);
+        setGames([]);
+    } catch {
+        console.error('Failed to disconnect Steam');
+    }
+}
+
   const steamConnected = connections.find(c => c.platform === 'STEAM' && c.active);
 
   return (
     <div className="dashboard">
       <Navbar />
       <div className="dashboard-content">
+
+          {/* Xbox Notification */}
+            {xboxNotification && (
+              <div className={`dashboard-notification ${xboxNotification.type === 'error' ? 'dashboard-notification--error' : ''}`}>
+                {xboxNotification.message}
+                <button onClick={() => setXboxNotification(null)}>✕</button>
+              </div>
+          )}
 
           {/* Platform Connections */}
           <section className="dashboard-section dashboard-section--platforms">
@@ -85,8 +162,14 @@ function loadGames(id) {
                 linkLoading={linkLoading}
                 linkError={linkError}
                 linkSuccess={linkSuccess}
+                onSteamDisconnect={handleSteamDisconnect}
               />
-              <PlatformCard platform="XBOX" connected={false} />
+              <PlatformCard platform="XBOX" 
+                connected={!!xboxProfile?.linked}
+                platformUserId={xboxProfile?.gamertag}
+                onXboxConnect={connectXbox}
+                onXboxDisconnect={handleXboxDisconnect}
+               />
               <PlatformCard platform="EPIC" connected={false} />
               </div>
           </section>
@@ -96,15 +179,15 @@ function loadGames(id) {
         <section className="dashboard-section">
           <div className="section-header">
             <h2 className="section-title">Your Library</h2>
-            <span className="section-count">{games.length} games</span>
+            <span className="section-count">{allGames.length} games</span>
           </div>
           {loading && <p className="dashboard-message">Loading games...</p>}
           {error && <p className="dashboard-message dashboard-message--error">{error}</p>}
-          {!loading && !error && games.length === 0 && (
+          {!loading && !error && allGames.length === 0 && (
             <p className="dashboard-message">No games found. Connect a platform to see your library.</p>
           )}
           <div className="games-grid">
-            {games.map(game => (
+            {allGames.map(game => (
               <GameCard key={game.id} game={game} />
             ))}
           </div>
@@ -112,7 +195,10 @@ function loadGames(id) {
       </div>
       {/* Stats Bar */}
       <aside className="dashboard-section--stats">
-        <StatsBar games={games} connections={connections}/>
+        <StatsBar games={allGames} 
+                  connections={connections}
+                  xboxLinked={!!xboxProfile?.linked}
+                  />
       </aside>
     </div>
     </div>
